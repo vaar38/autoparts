@@ -1,0 +1,11 @@
+# Личные настройки с паролем — в git не загружаем (образец: db.properties.example)
+db.properties
+
+# Файлы, которые создаёт программа или сборка
+exports/
+target/
+dependency-reduced-pom.xml
+*~
+.idea/
+*.iml
+.github/modernize/

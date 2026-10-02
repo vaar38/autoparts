@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="420" viewBox="0 0 900 420" font-family="Segoe UI, Arial, sans-serif" font-size="13">
+  <rect width="900" height="420" fill="#ffffff"/>
+  <text x="450" y="24" text-anchor="middle" font-size="16" font-weight="bold" fill="#1f2937">ER-диаграмма базы данных autoparts</text>
+
+  <!-- customers -->
+  <g transform="translate(30,50)">
+    <rect width="370" height="194" rx="6" fill="#f8fafc" stroke="#334155" stroke-width="1.5"/>
+    <rect width="370" height="34" rx="6" fill="#1e40af"/>
+    <rect y="28" width="370" height="6" fill="#1e40af"/>
+    <text x="185" y="22" text-anchor="middle" fill="#ffffff" font-weight="bold" font-size="14">customers (клиенты)</text>
+    <g fill="#111827">
+      <text x="10" y="56" font-weight="bold" fill="#b45309">PK</text><text x="44" y="56" font-weight="bold">id</text><text x="150" y="56">SERIAL</text>
+      <text x="44" y="82">full_name</text><text x="150" y="82">VARCHAR(100) NOT NULL</text>
+      <text x="44" y="108">phone</text><text x="150" y="108">VARCHAR(20) NOT NULL UNIQUE</text>
+      <text x="44" y="134">email</text><text x="150" y="134">VARCHAR(100) NOT NULL UNIQUE</text>
+      <text x="44" y="160">city</text><text x="150" y="160">VARCHAR(50) NOT NULL</text>
+      <text x="44" y="186">registered_at</text><text x="150" y="186">DATE NOT NULL</text>
+    </g>
+    <g stroke="#e2e8f0"><line x1="0" y1="64" x2="370" y2="64"/><line x1="0" y1="90" x2="370" y2="90"/><line x1="0" y1="116" x2="370" y2="116"/><line x1="0" y1="142" x2="370" y2="142"/><line x1="0" y1="168" x2="370" y2="168"/></g>
+  </g>
+
+  <!-- orders -->
+  <g transform="translate(520,50)">
+    <rect width="350" height="298" rx="6" fill="#f8fafc" stroke="#334155" stroke-width="1.5"/>
+    <rect width="350" height="34" rx="6" fill="#047857"/>
+    <rect y="28" width="350" height="6" fill="#047857"/>
+    <text x="175" y="22" text-anchor="middle" fill="#ffffff" font-weight="bold" font-size="14">orders (заказы запчастей)</text>
+    <g fill="#111827">
+      <text x="10" y="56" font-weight="bold" fill="#b45309">PK</text><text x="44" y="56" font-weight="bold">id</text><text x="150" y="56">SERIAL</text>
+      <text x="10" y="82" font-weight="bold" fill="#1d4ed8">FK</text><text x="44" y="82" font-weight="bold">customer_id</text><text x="150" y="82">INTEGER NOT NULL</text>
+      <text x="44" y="108">part_name</text><text x="150" y="108">VARCHAR(100) NOT NULL</text>
+      <text x="44" y="134">part_number</text><text x="150" y="134">VARCHAR(30) NOT NULL</text>
+      <text x="44" y="160">car_brand</text><text x="150" y="160">VARCHAR(50) NOT NULL</text>
+      <text x="44" y="186">category</text><text x="150" y="186">VARCHAR(20) CHECK (enum)</text>
+      <text x="44" y="212">quantity</text><text x="150" y="212">INTEGER CHECK 1..100</text>
+      <text x="44" y="238">unit_price</text><text x="150" y="238">NUMERIC(10,2) CHECK &gt; 0</text>
+      <text x="44" y="264">status</text><text x="150" y="264">VARCHAR(20) CHECK (enum)</text>
+      <text x="44" y="290">created_at</text><text x="150" y="290">TIMESTAMP NOT NULL</text>
+    </g>
+    <g stroke="#e2e8f0"><line x1="0" y1="64" x2="350" y2="64"/><line x1="0" y1="90" x2="350" y2="90"/><line x1="0" y1="116" x2="350" y2="116"/><line x1="0" y1="142" x2="350" y2="142"/><line x1="0" y1="168" x2="350" y2="168"/><line x1="0" y1="194" x2="350" y2="194"/><line x1="0" y1="220" x2="350" y2="220"/><line x1="0" y1="246" x2="350" y2="246"/><line x1="0" y1="272" x2="350" y2="272"/></g>
+  </g>
+
+  <!-- связь customers.id (1) —< orders.customer_id (много) -->
+  <g stroke="#334155" stroke-width="1.5" fill="none">
+    <path d="M400,102 H460 V128 H520"/>
+    <line x1="410" y1="94" x2="410" y2="110"/>
+    <line x1="417" y1="94" x2="417" y2="110"/>
+    <line x1="500" y1="120" x2="500" y2="136"/>
+    <line x1="506" y1="128" x2="520" y2="119"/>
+    <line x1="506" y1="128" x2="520" y2="137"/>
+  </g>
+  <text x="425" y="92" fill="#334155">1</text>
+  <text x="484" y="118" fill="#334155">N</text>
+  <text x="460" y="160" text-anchor="middle" fill="#475569" font-size="12">один клиент —</text>
+  <text x="460" y="175" text-anchor="middle" fill="#475569" font-size="12">много заказов</text>
+
+  <g font-size="12" fill="#475569">
+    <text x="30" y="290">FOREIGN KEY: orders.customer_id → customers.id (ON DELETE RESTRICT)</text>
+    <text x="30" y="310">category: ENGINE, BRAKES, SUSPENSION,</text>
+    <text x="30" y="326">          ELECTRICAL, FILTERS, BODY</text>
+    <text x="30" y="346">status: NEW, CONFIRMED, SHIPPED,</text>
+    <text x="30" y="362">        DELIVERED, CANCELLED</text>
+    <text x="30" y="390"><tspan fill="#b45309" font-weight="bold">PK</tspan> — первичный ключ,  <tspan fill="#1d4ed8" font-weight="bold">FK</tspan> — внешний ключ</text>
+  </g>
+</svg>
