@@ -2,6 +2,7 @@ package ru.mirea.autoparts.service;
 
 import ru.mirea.autoparts.exception.BusinessException;
 import ru.mirea.autoparts.exception.EntityNotFoundException;
+import ru.mirea.autoparts.exception.ValidationException;
 import ru.mirea.autoparts.model.Order;
 import ru.mirea.autoparts.model.OrderStatus;
 import ru.mirea.autoparts.model.PartCategory;
@@ -9,15 +10,25 @@ import ru.mirea.autoparts.repository.CustomerRepository;
 import ru.mirea.autoparts.repository.OrderRepository;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.List;
 
 /**
- * Бизнес-логика заказов: создание, изменение, смена статуса, удаление,
- * а также поиск (через SQL), фильтрация и сортировка (через Stream API).
+ * Бизнес-логика заказов: создание, изменение, смена статуса, удаление и проверка данных.
+ * Поиск и фильтрация описаны в OrderFilter, сортировка — в OrderSort.
  */
 public class OrderService {
     public static final int MAX_QUANTITY = 100;
+    /** Верхняя граница цены: NUMERIC(10,2) в таблице вмещает до 99 999 999.99. */
+    public static final BigDecimal MAX_PRICE = new BigDecimal("99999999.99");
+
+    // Имена полей формы — по ним окно подсвечивает поле с ошибкой
+    public static final String FIELD_CUSTOMER = "customer";
+    public static final String FIELD_PART_NAME = "partName";
+    public static final String FIELD_PART_NUMBER = "partNumber";
+    public static final String FIELD_CAR_BRAND = "carBrand";
+    public static final String FIELD_CATEGORY = "category";
+    public static final String FIELD_QUANTITY = "quantity";
+    public static final String FIELD_UNIT_PRICE = "unitPrice";
 
     private final OrderRepository orderRepository;
     private final CustomerRepository customerRepository;
@@ -31,9 +42,8 @@ public class OrderService {
 
     public Order create(int customerId, String partName, String partNumber, String carBrand,
                         PartCategory category, int quantity, BigDecimal unitPrice) {
-        ensureCustomerExists(customerId);
-        validate(partName, partNumber, carBrand, category, quantity, unitPrice);
         Order order = new Order(customerId, partName, partNumber, carBrand, category, quantity, unitPrice);
+        validate(order);
         orderRepository.save(order);
         return getById(order.getId());   // перечитываем, чтобы получить имя клиента
     }
@@ -47,16 +57,16 @@ public class OrderService {
                 .orElseThrow(() -> new EntityNotFoundException("Заказ", id));
     }
 
+    /** Заказы одного клиента (связанные данные). */
+    public List<Order> getByCustomer(int customerId) {
+        return orderRepository.findByCustomerId(customerId);
+    }
+
     /** Бизнес-правило: менять состав заказа можно, только пока он в статусе «Новый». */
     public Order update(int id, int customerId, String partName, String partNumber, String carBrand,
                         PartCategory category, int quantity, BigDecimal unitPrice) {
         Order order = getById(id);
-        if (order.getStatus() != OrderStatus.NEW) {
-            throw new BusinessException("Изменять можно только заказы в статусе «" + OrderStatus.NEW.getTitle()
-                    + "». Текущий статус заказа: «" + order.getStatus().getTitle() + "».");
-        }
-        ensureCustomerExists(customerId);
-        validate(partName, partNumber, carBrand, category, quantity, unitPrice);
+        ensureEditable(order);
         order.setCustomerId(customerId);
         order.setPartName(partName);
         order.setPartNumber(partNumber);
@@ -64,8 +74,17 @@ public class OrderService {
         order.setCategory(category);
         order.setQuantity(quantity);
         order.setUnitPrice(unitPrice);
+        validate(order);
         orderRepository.update(order);
         return getById(id);
+    }
+
+    /** Проверка перед открытием формы редактирования: не даём править заказ, который уже нельзя менять. */
+    public void ensureEditable(Order order) {
+        if (order.getStatus() != OrderStatus.NEW) {
+            throw new BusinessException("Изменять можно только заказы в статусе «" + OrderStatus.NEW.getTitle()
+                    + "». Текущий статус заказа №" + order.getId() + ": «" + order.getStatus().getTitle() + "».");
+        }
     }
 
     /** Бизнес-правило: статус меняется только по разрешённым переходам (см. OrderStatus.getAllowedNext). */
@@ -86,113 +105,40 @@ public class OrderService {
         Order order = getById(id);
         if (order.getStatus() != OrderStatus.NEW && order.getStatus() != OrderStatus.CANCELLED) {
             throw new BusinessException("Удалять можно только новые или отменённые заказы. Текущий статус: «"
-                    + order.getStatus().getTitle() + "».");
+                    + order.getStatus().getTitle() + "». Сначала отмените заказ или дождитесь его завершения.");
         }
         orderRepository.deleteById(id);
     }
 
-    // ------------------------------------------------------------------ Поиск (SQL LIKE в репозитории)
-
-    public List<Order> searchByPartName(String text) {
-        return orderRepository.searchByPartName(requireSearchText(text));
-    }
-
-    public List<Order> searchByPartNumber(String text) {
-        return orderRepository.searchByPartNumber(requireSearchText(text));
-    }
-
-    public List<Order> searchByCarBrand(String text) {
-        return orderRepository.searchByCarBrand(requireSearchText(text));
-    }
-
-    public List<Order> searchByCustomerName(String text) {
-        return orderRepository.searchByCustomerName(requireSearchText(text));
-    }
-
-    // ------------------------------------------------------------------ Фильтрация (Stream API)
-
-    public List<Order> filterByStatus(OrderStatus status) {
-        return getAll().stream()
-                .filter(order -> order.getStatus() == status)
-                .toList();
-    }
-
-    public List<Order> filterByCategory(PartCategory category) {
-        return getAll().stream()
-                .filter(order -> order.getCategory() == category)
-                .toList();
-    }
-
-    public List<Order> filterByCustomer(int customerId) {
-        ensureCustomerExists(customerId);
-        return getAll().stream()
-                .filter(order -> order.getCustomerId() == customerId)
-                .toList();
-    }
-
-    public List<Order> filterByTotalRange(BigDecimal min, BigDecimal max) {
-        if (min.compareTo(max) > 0) {
-            throw new BusinessException("Минимальная сумма не может быть больше максимальной.");
-        }
-        return getAll().stream()
-                .filter(order -> order.getTotal().compareTo(min) >= 0 && order.getTotal().compareTo(max) <= 0)
-                .toList();
-    }
-
-    public List<Order> filterByDateRange(LocalDate from, LocalDate to) {
-        if (from.isAfter(to)) {
-            throw new BusinessException("Начальная дата не может быть позже конечной.");
-        }
-        return getAll().stream()
-                .filter(order -> {
-                    LocalDate date = order.getCreatedAt().toLocalDate();
-                    return !date.isBefore(from) && !date.isAfter(to);
-                })
-                .toList();
-    }
-
-    // ------------------------------------------------------------------ Сортировка (Stream API + Comparator)
-
-    public List<Order> sort(OrderSort sort) {
-        return getAll().stream()
-                .sorted(sort.getComparator())
-                .toList();
-    }
-
     // ------------------------------------------------------------------ Проверки
 
-    private void ensureCustomerExists(int customerId) {
-        if (customerRepository.findById(customerId).isEmpty()) {
-            throw new EntityNotFoundException("Клиент", customerId);
+    /** Проверяет все поля заказа до сохранения. Строки очищаются от пробелов по краям. */
+    private void validate(Order order) {
+        if (order.getCustomerId() <= 0) {
+            throw new ValidationException(FIELD_CUSTOMER, "Выберите клиента из списка.");
         }
-    }
-
-    private void validate(String partName, String partNumber, String carBrand,
-                          PartCategory category, int quantity, BigDecimal unitPrice) {
-        if (partName == null || partName.isBlank()) {
-            throw new BusinessException("Название запчасти не может быть пустым.");
+        // Ссылка на связанную сущность: клиент должен существовать в базе
+        if (customerRepository.findById(order.getCustomerId()).isEmpty()) {
+            throw new ValidationException(FIELD_CUSTOMER, "Выбранный клиент не найден в базе — обновите список клиентов.");
         }
-        if (partNumber == null || partNumber.isBlank()) {
-            throw new BusinessException("Артикул не может быть пустым.");
+        order.setPartName(Validation.requireText(order.getPartName(), FIELD_PART_NAME, "Название запчасти", 100));
+        order.setPartNumber(Validation.requireText(order.getPartNumber(), FIELD_PART_NUMBER, "Артикул", 30));
+        if (!order.getPartNumber().matches("[A-Za-z0-9-]+")) {
+            throw new ValidationException(FIELD_PART_NUMBER, "Артикул может содержать только латинские буквы, цифры и дефис.");
         }
-        if (carBrand == null || carBrand.isBlank()) {
-            throw new BusinessException("Марка автомобиля не может быть пустой.");
+        order.setCarBrand(Validation.requireText(order.getCarBrand(), FIELD_CAR_BRAND, "Марка автомобиля", 50));
+        if (order.getCategory() == null) {
+            throw new ValidationException(FIELD_CATEGORY, "Выберите категорию запчасти.");
         }
-        if (category == null) {
-            throw new BusinessException("Не выбрана категория запчасти.");
+        if (order.getQuantity() < 1 || order.getQuantity() > MAX_QUANTITY) {
+            throw new ValidationException(FIELD_QUANTITY, "Количество должно быть от 1 до " + MAX_QUANTITY + " шт.");
         }
-        if (quantity < 1 || quantity > MAX_QUANTITY) {
-            throw new BusinessException("Количество должно быть от 1 до " + MAX_QUANTITY + " шт.");
+        BigDecimal price = order.getUnitPrice();
+        if (price == null || price.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new ValidationException(FIELD_UNIT_PRICE, "Цена должна быть больше нуля.");
         }
-        if (unitPrice == null || unitPrice.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new BusinessException("Цена должна быть больше нуля.");
+        if (price.compareTo(MAX_PRICE) > 0) {
+            throw new ValidationException(FIELD_UNIT_PRICE, "Цена слишком большая: максимум 99 999 999,99 руб.");
         }
-    }
-
-    private String requireSearchText(String text) {
-        if (text == null || text.isBlank()) {
-            throw new BusinessException("Строка поиска не может быть пустой.");
-        }
-        return text.trim();
     }
 }

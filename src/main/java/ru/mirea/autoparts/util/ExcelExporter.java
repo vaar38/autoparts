@@ -14,13 +14,10 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-/** Экспорт в Excel (.xlsx) с помощью библиотеки Apache POI. Два листа: «Заказы» и «Клиенты». */
+/** Экспорт в Excel (.xlsx) с помощью библиотеки Apache POI. Два листа: «Заказы» (текущий список) и «Клиенты». */
 public class ExcelExporter implements DataExporter {
-    private static final DateTimeFormatter FILE_NAME_TIME = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss");
 
     @Override
     public String getFormatName() {
@@ -28,23 +25,24 @@ public class ExcelExporter implements DataExporter {
     }
 
     @Override
-    public Path export(List<Customer> customers, List<Order> orders, Path directory) throws IOException {
+    public String getExtension() {
+        return "xlsx";
+    }
+
+    @Override
+    public void export(List<Order> orders, List<Customer> customers, Path file) throws IOException {
         try (Workbook workbook = new XSSFWorkbook()) {
             Styles styles = new Styles(workbook);
             writeOrdersSheet(workbook.createSheet("Заказы"), orders, styles);
             writeCustomersSheet(workbook.createSheet("Клиенты"), customers, styles);
-
-            Files.createDirectories(directory);
-            Path file = directory.resolve("autoparts_" + LocalDateTime.now().format(FILE_NAME_TIME) + ".xlsx");
             try (OutputStream out = Files.newOutputStream(file)) {
                 workbook.write(out);
             }
-            return file;
         }
     }
 
     private void writeOrdersSheet(Sheet sheet, List<Order> orders, Styles styles) {
-        String[] headers = {"ID", "Клиент", "Запчасть", "Артикул", "Марка авто", "Категория",
+        String[] headers = {"№ заказа", "Клиент", "Запчасть", "Артикул", "Марка авто", "Категория",
                 "Кол-во", "Цена, руб.", "Сумма, руб.", "Статус", "Дата создания"};
         writeHeader(sheet, headers, styles.header);
 

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DialogPane?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.VBox?>
+
+<!-- Форма заказа. Корень — DialogPane: контроллер вставляет её в Dialog и добавляет кнопки «Сохранить» / «Отмена». -->
+<DialogPane fx:id="dialogPane" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="ru.mirea.autoparts.fx.controller.OrderDialogController"
+            prefWidth="520" styleClass="form-dialog">
+    <content>
+        <VBox spacing="12">
+            <GridPane hgap="12" vgap="10" styleClass="form-grid">
+                <columnConstraints>
+                    <ColumnConstraints minWidth="150"/>
+                    <ColumnConstraints hgrow="ALWAYS"/>
+                </columnConstraints>
+
+                <Label text="Клиент *" GridPane.rowIndex="0"/>
+                <ComboBox fx:id="customerCombo" promptText="выберите клиента" maxWidth="Infinity"
+                          GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+                <Label text="Название запчасти *" GridPane.rowIndex="1"/>
+                <TextField fx:id="partNameField" promptText="например, Тормозные колодки передние"
+                           GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+                <Label text="Артикул *" GridPane.rowIndex="2"/>
+                <TextField fx:id="partNumberField" promptText="латиница и цифры, например 0986494524"
+                           GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+                <Label text="Марка автомобиля *" GridPane.rowIndex="3"/>
+                <TextField fx:id="carBrandField" promptText="например, Toyota"
+                           GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+
+                <Label text="Категория *" GridPane.rowIndex="4"/>
+                <ComboBox fx:id="categoryCombo" promptText="выберите категорию" maxWidth="Infinity"
+                          GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+
+                <Label text="Количество, шт. *" GridPane.rowIndex="5"/>
+                <TextField fx:id="quantityField" promptText="от 1 до 100"
+                           GridPane.rowIndex="5" GridPane.columnIndex="1"/>
+
+                <Label text="Цена за штуку, руб. *" GridPane.rowIndex="6"/>
+                <TextField fx:id="priceField" promptText="например, 3450.00"
+                           GridPane.rowIndex="6" GridPane.columnIndex="1"/>
+
+                <Label text="Сумма заказа" GridPane.rowIndex="7"/>
+                <Label fx:id="totalLabel" styleClass="details-total" GridPane.rowIndex="7" GridPane.columnIndex="1"/>
+            </GridPane>
+            <Label text="* — обязательные поля. Новый заказ создаётся в статусе «Новый»." styleClass="hint-label" wrapText="true"/>
+            <Label fx:id="errorLabel" styleClass="error-label" wrapText="true"/>
+        </VBox>
+    </content>
+</DialogPane>

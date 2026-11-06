@@ -8,16 +8,14 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 /**
- * Экспорт заказов в CSV (текстовая таблица, столбцы разделены точкой с запятой).
+ * Экспорт текущего списка заказов в CSV (текстовая таблица, столбцы разделены точкой с запятой).
  * Список клиентов здесь не нужен: имя клиента уже есть в каждом заказе.
  */
 public class CsvExporter implements DataExporter {
-    private static final DateTimeFormatter FILE_NAME_TIME = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss");
     private static final DateTimeFormatter DATE_TIME = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
     private static final String SEPARATOR = ";";
 
@@ -27,13 +25,15 @@ public class CsvExporter implements DataExporter {
     }
 
     @Override
-    public Path export(List<Customer> customers, List<Order> orders, Path directory) throws IOException {
-        Files.createDirectories(directory);
-        Path file = directory.resolve("orders_" + LocalDateTime.now().format(FILE_NAME_TIME) + ".csv");
+    public String getExtension() {
+        return "csv";
+    }
 
+    @Override
+    public void export(List<Order> orders, List<Customer> customers, Path file) throws IOException {
         try (BufferedWriter writer = Files.newBufferedWriter(file, StandardCharsets.UTF_8)) {
             writer.write('﻿');   // BOM — чтобы Excel правильно показал русские буквы
-            writer.write(String.join(SEPARATOR, "ID", "Клиент", "Запчасть", "Артикул", "Марка авто",
+            writer.write(String.join(SEPARATOR, "№ заказа", "Клиент", "Запчасть", "Артикул", "Марка авто",
                     "Категория", "Кол-во", "Цена", "Сумма", "Статус", "Дата создания"));
             writer.newLine();
             for (Order order : orders) {
@@ -52,7 +52,6 @@ public class CsvExporter implements DataExporter {
                 writer.newLine();
             }
         }
-        return file;
     }
 
     /** Значение с ; или кавычками заключаем в кавычки по правилам CSV. */

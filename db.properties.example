@@ -1,6 +1,0 @@
-# Образец настроек подключения к PostgreSQL.
-# Скопируйте этот файл в db.properties (рядом с ним) и впишите пароль от СВОЕГО PostgreSQL.
-# Файл db.properties в git не загружается (он указан в .gitignore), поэтому пароль останется только у вас.
-db.url=jdbc:postgresql://localhost:5432/autoparts
-db.user=postgres
-db.password=ВАШ_ПАРОЛЬ

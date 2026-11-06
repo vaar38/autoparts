@@ -26,16 +26,7 @@ public class OrderRepository implements CrudRepository<Order> {
 
     private static final String SELECT_ALL = SELECT_BASE + "ORDER BY o.id";
     private static final String SELECT_BY_ID = SELECT_BASE + "WHERE o.id = ?";
-
-    // Поиск без учёта регистра: LOWER(столбец) LIKE LOWER('%текст%')
-    private static final String SEARCH_BY_PART_NAME =
-            SELECT_BASE + "WHERE LOWER(o.part_name) LIKE LOWER(?) ORDER BY o.id";
-    private static final String SEARCH_BY_PART_NUMBER =
-            SELECT_BASE + "WHERE LOWER(o.part_number) LIKE LOWER(?) ORDER BY o.id";
-    private static final String SEARCH_BY_CAR_BRAND =
-            SELECT_BASE + "WHERE LOWER(o.car_brand) LIKE LOWER(?) ORDER BY o.id";
-    private static final String SEARCH_BY_CUSTOMER_NAME =
-            SELECT_BASE + "WHERE LOWER(c.full_name) LIKE LOWER(?) ORDER BY o.id";
+    private static final String SELECT_BY_CUSTOMER = SELECT_BASE + "WHERE o.customer_id = ? ORDER BY o.created_at DESC";
 
     private static final String INSERT =
             "INSERT INTO orders (customer_id, part_name, part_number, car_brand, category, "
@@ -114,20 +105,9 @@ public class OrderRepository implements CrudRepository<Order> {
         }
     }
 
-    public List<Order> searchByPartName(String text) {
-        return queryList(SEARCH_BY_PART_NAME, "%" + text + "%", "поиск по названию");
-    }
-
-    public List<Order> searchByPartNumber(String text) {
-        return queryList(SEARCH_BY_PART_NUMBER, "%" + text + "%", "поиск по артикулу");
-    }
-
-    public List<Order> searchByCarBrand(String text) {
-        return queryList(SEARCH_BY_CAR_BRAND, "%" + text + "%", "поиск по марке автомобиля");
-    }
-
-    public List<Order> searchByCustomerName(String text) {
-        return queryList(SEARCH_BY_CUSTOMER_NAME, "%" + text + "%", "поиск по клиенту");
+    /** Заказы одного клиента (связанные данные для вкладки «Клиенты»). */
+    public List<Order> findByCustomerId(int customerId) {
+        return queryList(SELECT_BY_CUSTOMER, customerId, "получение заказов клиента");
     }
 
     public int countByCustomerId(int customerId) {
@@ -143,13 +123,13 @@ public class OrderRepository implements CrudRepository<Order> {
         }
     }
 
-    /** Выполняет SELECT с одним необязательным строковым параметром и собирает список заказов. */
-    private List<Order> queryList(String sql, String parameter, String action) {
+    /** Выполняет SELECT с одним необязательным числовым параметром и собирает список заказов. */
+    private List<Order> queryList(String sql, Integer parameter, String action) {
         List<Order> orders = new ArrayList<>();
         try (Connection connection = db.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
             if (parameter != null) {
-                statement.setString(1, parameter);
+                statement.setInt(1, parameter);
             }
             try (ResultSet rs = statement.executeQuery()) {
                 while (rs.next()) {

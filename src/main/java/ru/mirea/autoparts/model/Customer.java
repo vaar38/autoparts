@@ -15,8 +15,8 @@ public class Customer {
     private LocalDate registeredAt;
 
     /** Конструктор для нового клиента: id выдаст база данных при сохранении. */
-    public Customer(String fullName, String phone, String email, String city) {
-        this(0, fullName, phone, email, city, LocalDate.now());
+    public Customer(String fullName, String phone, String email, String city, LocalDate registeredAt) {
+        this(0, fullName, phone, email, city, registeredAt);
     }
 
     /** Конструктор для клиента, прочитанного из базы данных. */
@@ -73,8 +73,13 @@ public class Customer {
         return registeredAt;
     }
 
+    public void setRegisteredAt(LocalDate registeredAt) {
+        this.registeredAt = registeredAt;
+    }
+
+    /** Так клиент выглядит в выпадающих списках JavaFX (ComboBox). */
     @Override
     public String toString() {
-        return "#" + id + " " + fullName + ", тел. " + phone + ", " + email + ", г. " + city;
+        return fullName + " (" + phone + ")";
     }
 }

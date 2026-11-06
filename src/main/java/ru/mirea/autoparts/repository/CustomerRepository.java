@@ -26,11 +26,16 @@ public class CustomerRepository implements CrudRepository<Customer> {
     private static final String SELECT_BY_ID =
             "SELECT id, full_name, phone, email, city, registered_at FROM customers WHERE id = ?";
     private static final String UPDATE =
-            "UPDATE customers SET full_name = ?, phone = ?, email = ?, city = ? WHERE id = ?";
+            "UPDATE customers SET full_name = ?, phone = ?, email = ?, city = ?, registered_at = ? WHERE id = ?";
     private static final String DELETE =
             "DELETE FROM customers WHERE id = ?";
     private static final String COUNT =
             "SELECT COUNT(*) FROM customers";
+    // id <> ? — при редактировании сам клиент не считается «дубликатом» самого себя
+    private static final String EXISTS_PHONE =
+            "SELECT EXISTS (SELECT 1 FROM customers WHERE phone = ? AND id <> ?)";
+    private static final String EXISTS_EMAIL =
+            "SELECT EXISTS (SELECT 1 FROM customers WHERE LOWER(email) = LOWER(?) AND id <> ?)";
 
     private final DatabaseManager db;
 
@@ -97,7 +102,8 @@ public class CustomerRepository implements CrudRepository<Customer> {
             statement.setString(2, customer.getPhone());
             statement.setString(3, customer.getEmail());
             statement.setString(4, customer.getCity());
-            statement.setInt(5, customer.getId());
+            statement.setDate(5, Date.valueOf(customer.getRegisteredAt()));
+            statement.setInt(6, customer.getId());
             return statement.executeUpdate() > 0;
         } catch (SQLException e) {
             throw handle(e, "изменение клиента");
@@ -124,6 +130,30 @@ public class CustomerRepository implements CrudRepository<Customer> {
             return rs.getInt(1);
         } catch (SQLException e) {
             throw handle(e, "подсчёт клиентов");
+        }
+    }
+
+    /** Есть ли другой клиент (с id, не равным excludeId) с таким телефоном. */
+    public boolean existsByPhone(String phone, int excludeId) {
+        return exists(EXISTS_PHONE, phone, excludeId, "проверка телефона");
+    }
+
+    /** Есть ли другой клиент (с id, не равным excludeId) с таким email. */
+    public boolean existsByEmail(String email, int excludeId) {
+        return exists(EXISTS_EMAIL, email, excludeId, "проверка email");
+    }
+
+    private boolean exists(String sql, String value, int excludeId, String action) {
+        try (Connection connection = db.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, value);
+            statement.setInt(2, excludeId);
+            try (ResultSet rs = statement.executeQuery()) {
+                rs.next();
+                return rs.getBoolean(1);
+            }
+        } catch (SQLException e) {
+            throw handle(e, action);
         }
     }
 

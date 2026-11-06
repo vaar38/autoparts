@@ -1,5 +1,5 @@
-# Личные настройки с паролем — в git не загружаем (образец: db.properties.example)
-db.properties
+# Личные настройки с паролем — в git не загружаем (образец: database.properties.example)
+src/main/resources/database.properties
 
 # Файлы, которые создаёт программа или сборка
 exports/
@@ -9,3 +9,6 @@ dependency-reduced-pom.xml
 .idea/
 *.iml
 .github/modernize/
+
+# Пароль для docker-compose.yml (образец: .env.example)
+.env

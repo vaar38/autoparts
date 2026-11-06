@@ -1,0 +1,31 @@
+# Необязательный вариант: база данных КР №1 в Docker (для участников без локального PostgreSQL).
+# Запуск из папки проекта:   docker compose up -d --wait
+# Остановка (данные сохраняются в volume): docker compose down
+# При первом запуске контейнер сам создаёт базу autoparts и выполняет sql/autoparts.sql (таблицы + тестовые данные).
+# Пароль берётся из файла .env (образец — .env.example).
+# Подключение JavaFX-приложения (database.properties):
+#   db.url=jdbc:postgresql://localhost:55433/autoparts
+#   db.user=autoparts
+#   db.password=<значение AUTOPARTS_DB_PASSWORD из .env>
+services:
+  postgres:
+    image: postgres:17
+    container_name: autoparts-db
+    environment:
+      POSTGRES_DB: autoparts
+      POSTGRES_USER: autoparts
+      POSTGRES_PASSWORD: ${AUTOPARTS_DB_PASSWORD:?Укажите AUTOPARTS_DB_PASSWORD в файле .env}
+    ports:
+      # 55433 на компьютере -> 5432 внутри контейнера (не мешает локальному PostgreSQL и базе из архива на 55432)
+      - "55433:5432"
+    volumes:
+      - autoparts-data:/var/lib/postgresql/data
+      - ./sql/autoparts.sql:/docker-entrypoint-initdb.d/01-autoparts.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U autoparts -d autoparts"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  autoparts-data:

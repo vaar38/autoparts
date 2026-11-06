@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!-- Служебные сообщения библиотек в консоль не выводим, чтобы они не мешали меню. -->
-<Configuration status="off">
-    <Loggers>
-        <Root level="off"/>
-    </Loggers>
-</Configuration>

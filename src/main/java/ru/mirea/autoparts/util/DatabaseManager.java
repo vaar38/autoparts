@@ -5,10 +5,10 @@ import ru.mirea.autoparts.exception.BusinessException;
 import ru.mirea.autoparts.exception.DatabaseException;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -16,10 +16,11 @@ import java.util.Properties;
 
 /**
  * Отвечает за подключение к PostgreSQL через JDBC.
- * Параметры подключения читаются из файла db.properties в папке проекта.
+ * Параметры подключения читаются из файла database.properties в ресурсах приложения
+ * (src/main/resources), поэтому пароль не хранится в исходном коде.
  */
 public class DatabaseManager {
-    private static final String CONFIG_FILE = "db.properties";
+    private static final String CONFIG_FILE = "database.properties";
 
     // Коды ошибок SQLState из стандарта SQL
     private static final String UNIQUE_VIOLATION = "23505";
@@ -33,16 +34,26 @@ public class DatabaseManager {
 
     public DatabaseManager() {
         Properties props = new Properties();
-        try (Reader reader = Files.newBufferedReader(Path.of(CONFIG_FILE), StandardCharsets.UTF_8)) {
+        // Ресурс ищется в classpath: Maven копирует его из src/main/resources в target/classes
+        InputStream stream = DatabaseManager.class.getClassLoader().getResourceAsStream(CONFIG_FILE);
+        if (stream == null) {
+            throw new DatabaseException("Не найден файл настроек " + CONFIG_FILE + ".\n"
+                    + "Создайте его в папке src/main/resources из образца database.properties.example "
+                    + "и впишите свой пароль от PostgreSQL.", null);
+        }
+        try (Reader reader = new InputStreamReader(stream, StandardCharsets.UTF_8)) {
             props.load(reader);
         } catch (IOException e) {
-            throw new DatabaseException("Не удалось прочитать файл настроек " + CONFIG_FILE
-                    + ". Он должен лежать в папке проекта рядом с pom.xml. "
-                    + "Создайте его из образца db.properties.example и впишите свой пароль.", e);
+            throw new DatabaseException("Не удалось прочитать файл настроек " + CONFIG_FILE + ".", e);
         }
         this.url = props.getProperty("db.url");
         this.user = props.getProperty("db.user");
         this.password = props.getProperty("db.password");
+    }
+
+    /** Адрес базы (без пароля) — показывается в заголовке главного окна. */
+    public String getUrl() {
+        return url;
     }
 
     /** Открывает новое соединение. Закрывать его нужно через try-with-resources. */
@@ -55,7 +66,9 @@ public class DatabaseManager {
         try (Connection ignored = getConnection()) {
             // соединение открылось — значит всё в порядке, try-with-resources сразу его закроет
         } catch (SQLException e) {
-            throw new DatabaseException("Не удалось подключиться к базе данных " + url + ": " + e.getMessage(), e);
+            throw new DatabaseException("Не удалось подключиться к базе данных " + url + ".\n" + e.getMessage()
+                    + "\n\nПроверьте, что PostgreSQL запущен, база autoparts создана, "
+                    + "а в database.properties указаны верные логин и пароль.", e);
         }
     }
 

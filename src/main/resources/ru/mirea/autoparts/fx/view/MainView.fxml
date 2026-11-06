@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.SeparatorMenuItem?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.input.KeyCodeCombination?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.VBox?>
+
+<!-- Главное окно. fx:controller — какой класс обрабатывает события этой разметки.
+     onAction="#onExport" — при выборе пункта вызывается метод onExport() контроллера. -->
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="ru.mirea.autoparts.fx.controller.MainController"
+            styleClass="root-pane">
+    <top>
+        <VBox>
+            <MenuBar>
+                <Menu text="Файл">
+                    <MenuItem text="Экспорт заказов…" onAction="#onExport">
+                        <accelerator><KeyCodeCombination alt="UP" code="E" control="DOWN" meta="UP" shift="UP" shortcut="UP"/></accelerator>
+                    </MenuItem>
+                    <SeparatorMenuItem/>
+                    <MenuItem text="Выход" onAction="#onExit"/>
+                </Menu>
+                <Menu text="Данные">
+                    <MenuItem text="Обновить" onAction="#onRefresh">
+                        <accelerator><KeyCodeCombination alt="UP" code="F5" control="UP" meta="UP" shift="UP" shortcut="UP"/></accelerator>
+                    </MenuItem>
+                    <SeparatorMenuItem/>
+                    <MenuItem text="Заказы" onAction="#onShowOrders"/>
+                    <MenuItem text="Клиенты" onAction="#onShowCustomers"/>
+                    <MenuItem text="Статистика" onAction="#onShowStatistics"/>
+                </Menu>
+                <Menu text="Справка">
+                    <MenuItem text="О программе" onAction="#onAbout"/>
+                </Menu>
+            </MenuBar>
+            <HBox styleClass="app-header" alignment="CENTER_LEFT" spacing="12">
+                <VBox spacing="2">
+                    <Label text="Магазин автозапчастей" styleClass="app-title"/>
+                    <Label text="Учёт заказов: клиенты, заказы, статистика" styleClass="app-subtitle"/>
+                </VBox>
+                <Pane HBox.hgrow="ALWAYS"/>
+                <Label fx:id="connectionLabel" styleClass="connection-label"/>
+            </HBox>
+        </VBox>
+    </top>
+    <center>
+        <TabPane fx:id="tabPane" tabClosingPolicy="UNAVAILABLE" styleClass="main-tabs">
+            <!-- fx:include подключает отдельный FXML-файл; его контроллер попадёт в поле ordersViewController -->
+            <Tab fx:id="ordersTab" text="Заказы">
+                <fx:include fx:id="ordersView" source="OrdersView.fxml"/>
+            </Tab>
+            <Tab fx:id="customersTab" text="Клиенты">
+                <fx:include fx:id="customersView" source="CustomersView.fxml"/>
+            </Tab>
+            <Tab fx:id="statisticsTab" text="Статистика">
+                <fx:include fx:id="statisticsView" source="StatisticsView.fxml"/>
+            </Tab>
+        </TabPane>
+    </center>
+</BorderPane>

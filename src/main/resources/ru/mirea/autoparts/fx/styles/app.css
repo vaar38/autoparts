@@ -1,0 +1,358 @@
+/*
+ * Оформление приложения. JavaFX CSS похож на веб-CSS, но свойства начинаются с -fx-.
+ * Классы (styleClass) назначаются элементам в FXML или из кода: getStyleClass().add("...").
+ * Цвета вынесены в переменные-«токены» в .root, чтобы менять палитру в одном месте.
+ */
+.root {
+    -color-primary: #2563eb;
+    -color-primary-dark: #1d4ed8;
+    -color-accent: #0f766e;
+    -color-danger: #dc2626;
+    -color-danger-bg: #fef2f2;
+    -color-text: #1f2937;
+    -color-muted: #6b7280;
+    -color-border: #d1d5db;
+    -color-surface: #ffffff;
+    -color-background: #f3f4f6;
+    -color-header: #1e293b;
+
+    -fx-font-family: "Segoe UI", "Roboto", "Arial", sans-serif;
+    -fx-font-size: 13px;
+    -fx-text-fill: -color-text;
+    -fx-background-color: -color-background;
+    -fx-focus-color: -color-primary;
+    -fx-faint-focus-color: transparent;
+    -fx-accent: -color-primary;
+}
+
+/* ---------------------------------------------------------------- Заголовок и контейнеры */
+
+.app-header {
+    -fx-background-color: -color-header;
+    -fx-padding: 14 20 14 20;
+}
+
+.app-title {
+    -fx-text-fill: white;
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+}
+
+.app-subtitle,
+.connection-label {
+    -fx-text-fill: #cbd5e1;
+    -fx-font-size: 12px;
+}
+
+.main-tabs > .tab-header-area {
+    -fx-padding: 6 12 0 12;
+}
+
+.main-tabs .tab {
+    -fx-padding: 6 18 6 18;
+    -fx-background-radius: 6 6 0 0;
+}
+
+.main-tabs .tab:selected {
+    -fx-background-color: -color-surface;
+}
+
+.main-tabs .tab .tab-label {
+    -fx-font-size: 14px;
+}
+
+.content-pane {
+    -fx-padding: 14;
+    -fx-background-color: -color-surface;
+}
+
+.toolbar {
+    -fx-padding: 0 0 2 0;
+}
+
+.filter-panel,
+.chart-panel {
+    -fx-background-color: #f8fafc;
+    -fx-border-color: #e5e7eb;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 10 12 10 12;
+}
+
+/* Верхняя и нижняя части разделённой панели на вкладке «Клиенты» */
+.split-section {
+    -fx-padding: 14;
+    -fx-background-color: -color-surface;
+}
+
+.section-title {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+
+.field-label {
+    -fx-text-fill: -color-muted;
+    -fx-font-size: 11px;
+}
+
+.hint-label,
+.count-label {
+    -fx-text-fill: -color-muted;
+}
+
+.split-pane {
+    -fx-padding: 0;
+    -fx-background-color: -color-surface;
+}
+
+/* ---------------------------------------------------------------- Кнопки */
+
+.button {
+    -fx-background-color: -color-surface;
+    -fx-border-color: -color-border;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-padding: 6 14 6 14;
+    -fx-cursor: hand;
+}
+
+.button:hover {
+    -fx-background-color: #f1f5f9;
+}
+
+.button:disabled {
+    -fx-opacity: 0.45;
+}
+
+.primary-button {
+    -fx-background-color: -color-primary;
+    -fx-border-color: -color-primary;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+
+.primary-button:hover {
+    -fx-background-color: -color-primary-dark;
+}
+
+.accent-button {
+    -fx-border-color: -color-accent;
+    -fx-text-fill: -color-accent;
+    -fx-font-weight: bold;
+}
+
+.danger-button {
+    -fx-border-color: #fca5a5;
+    -fx-text-fill: -color-danger;
+}
+
+.danger-button:hover {
+    -fx-background-color: -color-danger-bg;
+}
+
+.link-button {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-text-fill: -color-primary;
+    -fx-padding: 6 6 6 6;
+}
+
+.link-button:hover {
+    -fx-underline: true;
+    -fx-background-color: transparent;
+}
+
+/* ---------------------------------------------------------------- Таблицы */
+
+.table-view {
+    -fx-background-color: -color-surface;
+    -fx-border-color: #e5e7eb;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+}
+
+.table-view .column-header,
+.table-view .filler {
+    -fx-background-color: #f1f5f9;
+    -fx-border-color: transparent transparent #e5e7eb transparent;
+    -fx-size: 34;
+}
+
+.table-view .column-header .label {
+    -fx-font-weight: bold;
+    -fx-text-fill: #374151;
+}
+
+.table-row-cell {
+    -fx-cell-size: 30;
+    -fx-background-color: -color-surface;
+    -fx-border-color: transparent transparent #f1f5f9 transparent;
+}
+
+.table-row-cell:odd {
+    -fx-background-color: #fafafa;
+}
+
+.table-row-cell:hover {
+    -fx-background-color: #eff6ff;
+}
+
+.table-row-cell:selected {
+    -fx-background-color: #dbeafe;
+}
+
+.table-row-cell:selected .table-cell {
+    -fx-text-fill: -color-text;
+}
+
+.table-cell {
+    -fx-padding: 0 6 0 6;
+    -fx-alignment: CENTER-LEFT;
+}
+
+.table-cell.align-right {
+    -fx-alignment: CENTER-RIGHT;
+}
+
+/* Цветные статусы заказа: и в ячейках таблицы, и в панели сведений */
+.status-new       { -fx-text-fill: #1d4ed8; }
+.status-confirmed { -fx-text-fill: #7c3aed; }
+.status-shipped   { -fx-text-fill: #b45309; }
+.status-delivered { -fx-text-fill: #15803d; }
+.status-cancelled { -fx-text-fill: #9ca3af; }
+
+.table-cell.status-new,
+.table-cell.status-confirmed,
+.table-cell.status-shipped,
+.table-cell.status-delivered,
+.table-cell.status-cancelled {
+    -fx-font-weight: bold;
+}
+
+.status-badge {
+    -fx-font-weight: bold;
+    -fx-padding: 2 8 2 8;
+    -fx-background-color: #f1f5f9;
+    -fx-background-radius: 10;
+}
+
+/* ---------------------------------------------------------------- Панель сведений о заказе */
+
+/* -fx-background задаёт и цвет текста по умолчанию (JavaFX подбирает контрастный),
+   поэтому фон делаем белым, а не прозрачным — иначе текст внутри становится белым */
+.details-scroll,
+.details-scroll > .viewport,
+.stats-scroll,
+.stats-scroll > .viewport {
+    -fx-background-color: -color-surface;
+    -fx-background: -color-surface;
+    -fx-padding: 0;
+}
+
+.details-panel {
+    -fx-background-color: #f8fafc;
+    -fx-border-color: #e5e7eb;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 12;
+}
+
+.details-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+}
+
+.details-key {
+    -fx-text-fill: -color-muted;
+}
+
+.details-total {
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+    -fx-text-fill: -color-accent;
+}
+
+/* ---------------------------------------------------------------- Формы ввода */
+
+.text-field,
+.combo-box,
+.date-picker {
+    -fx-background-radius: 6;
+    -fx-border-radius: 6;
+    -fx-border-color: -color-border;
+    -fx-background-color: -color-surface;
+}
+
+.text-field:focused,
+.combo-box:focused,
+.date-picker:focused {
+    -fx-border-color: -color-primary;
+}
+
+.date-picker > .text-field {
+    -fx-border-color: transparent;
+}
+
+.form-dialog > .content {
+    -fx-padding: 16 20 8 20;
+}
+
+.form-dialog .header-panel {
+    -fx-background-color: #f1f5f9;
+}
+
+.form-dialog .header-panel .label {
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+}
+
+.form-grid > .label {
+    -fx-text-fill: #374151;
+}
+
+/* Состояние ошибки: красная рамка у неверного поля и красное сообщение */
+.field-error,
+.field-error:focused {
+    -fx-border-color: -color-danger;
+    -fx-border-width: 1.5;
+    -fx-background-color: -color-danger-bg;
+}
+
+.error-label {
+    -fx-text-fill: -color-danger;
+    -fx-background-color: -color-danger-bg;
+    -fx-background-radius: 6;
+    -fx-padding: 6 10 6 10;
+}
+
+/* ---------------------------------------------------------------- Статистика */
+
+.stat-card {
+    -fx-background-color: -color-surface;
+    -fx-border-color: #e5e7eb;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 12 14 12 14;
+    -fx-pref-width: 230;
+    -fx-min-height: 74;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.06), 6, 0, 0, 1);
+}
+
+.stat-value {
+    -fx-font-size: 17px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -color-header;
+}
+
+.stat-name {
+    -fx-text-fill: -color-muted;
+    -fx-font-size: 12px;
+}
+
+.chart-panel {
+    -fx-background-color: -color-surface;
+}
+
+.chart-bar {
+    -fx-bar-fill: -color-primary;
+}

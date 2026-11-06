@@ -1,0 +1,9 @@
+# Образец настроек подключения JavaFX-приложения к PostgreSQL (база из КР №1).
+# Скопируйте этот файл в database.properties (в эту же папку src/main/resources) и впишите пароль от СВОЕГО PostgreSQL.
+# Файл database.properties в git не загружается (он указан в .gitignore), поэтому пароль останется только у вас.
+#
+# Локальный PostgreSQL:              jdbc:postgresql://localhost:5432/autoparts
+# PostgreSQL из нашего docker-compose.yml: jdbc:postgresql://localhost:55433/autoparts (пользователь autoparts, пароль из .env)
+db.url=jdbc:postgresql://localhost:5432/autoparts
+db.user=postgres
+db.password=ВАШ_ПАРОЛЬ

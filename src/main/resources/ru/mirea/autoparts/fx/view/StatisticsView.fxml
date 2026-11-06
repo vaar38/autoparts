@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.chart.BarChart?>
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.chart.PieChart?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.VBox?>
+
+<!-- Вкладка «Статистика»: карточки показателей (заполняются из контроллера), период и две диаграммы. -->
+<ScrollPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="ru.mirea.autoparts.fx.controller.StatisticsController"
+            fitToWidth="true" styleClass="stats-scroll">
+    <VBox spacing="14" styleClass="content-pane">
+        <HBox alignment="CENTER_LEFT" spacing="8">
+            <Label text="Общие показатели" styleClass="section-title"/>
+            <Pane HBox.hgrow="ALWAYS"/>
+            <Button text="⟳ Обновить" onAction="#refresh"/>
+        </HBox>
+        <FlowPane fx:id="cardsPane" hgap="12" vgap="12"/>
+
+        <VBox styleClass="filter-panel" spacing="10">
+            <HBox spacing="10" alignment="BOTTOM_LEFT">
+                <Label text="Показатели за период" styleClass="section-title"/>
+                <VBox spacing="3">
+                    <Label text="с" styleClass="field-label"/>
+                    <DatePicker fx:id="periodFromPicker" editable="false" prefWidth="140"/>
+                </VBox>
+                <VBox spacing="3">
+                    <Label text="по" styleClass="field-label"/>
+                    <DatePicker fx:id="periodToPicker" editable="false" prefWidth="140"/>
+                </VBox>
+                <Button text="Рассчитать" onAction="#onCalculatePeriod" styleClass="primary-button"/>
+            </HBox>
+            <Label fx:id="periodErrorLabel" styleClass="error-label" visible="false"/>
+            <FlowPane fx:id="periodCardsPane" hgap="12" vgap="12"/>
+        </VBox>
+
+        <HBox spacing="14">
+            <VBox styleClass="chart-panel" HBox.hgrow="ALWAYS" spacing="4">
+                <Label text="Сумма заказов по категориям (без отменённых)" styleClass="section-title"/>
+                <PieChart fx:id="categoryChart" legendVisible="false" labelsVisible="true" minHeight="320" prefHeight="340"/>
+            </VBox>
+            <VBox styleClass="chart-panel" HBox.hgrow="ALWAYS" spacing="4">
+                <Label text="Количество заказов по статусам" styleClass="section-title"/>
+                <BarChart fx:id="statusChart" legendVisible="false" animated="false" minHeight="320" prefHeight="340">
+                    <xAxis><CategoryAxis/></xAxis>
+                    <yAxis><NumberAxis fx:id="statusCountAxis" minorTickVisible="false" label="заказов"/></yAxis>
+                </BarChart>
+            </VBox>
+        </HBox>
+    </VBox>
+</ScrollPane>

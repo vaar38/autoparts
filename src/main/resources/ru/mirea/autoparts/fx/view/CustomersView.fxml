@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.VBox?>
+
+<!-- Вкладка «Клиенты»: сверху список клиентов, снизу заказы выбранного клиента (связанные данные). -->
+<SplitPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="ru.mirea.autoparts.fx.controller.CustomersController"
+           orientation="VERTICAL" dividerPositions="0.55">
+    <VBox spacing="10" minHeight="200" styleClass="split-section">
+        <HBox styleClass="toolbar" spacing="8" alignment="CENTER_LEFT">
+            <Button text="＋ Новый клиент" onAction="#onAdd" styleClass="primary-button"/>
+            <Button fx:id="editButton" text="Изменить" onAction="#onEdit"/>
+            <Button fx:id="deleteButton" text="Удалить" onAction="#onDelete" styleClass="danger-button">
+                <tooltip><Tooltip text="Клиента с заказами удалить нельзя"/></tooltip>
+            </Button>
+            <Pane HBox.hgrow="ALWAYS"/>
+            <Button text="⟳ Обновить" onAction="#onRefresh"/>
+        </HBox>
+        <HBox styleClass="filter-panel" spacing="10" alignment="BOTTOM_LEFT">
+            <VBox spacing="3">
+                <Label text="Поиск" styleClass="field-label"/>
+                <TextField fx:id="searchField" promptText="ФИО, телефон или email" prefWidth="280"/>
+            </VBox>
+            <VBox spacing="3">
+                <Label text="Город" styleClass="field-label"/>
+                <ComboBox fx:id="cityFilter" prefWidth="170"/>
+            </VBox>
+            <Button text="Сбросить" onAction="#onResetFilters" styleClass="link-button"/>
+        </HBox>
+        <TableView fx:id="customersTable" VBox.vgrow="ALWAYS">
+            <columnResizePolicy><TableView fx:constant="CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN"/></columnResizePolicy>
+            <columns>
+                <TableColumn fx:id="nameColumn" text="ФИО" prefWidth="260"/>
+                <TableColumn fx:id="phoneColumn" text="Телефон" prefWidth="140"/>
+                <TableColumn fx:id="emailColumn" text="Email" prefWidth="200"/>
+                <TableColumn fx:id="cityColumn" text="Город" prefWidth="130"/>
+                <TableColumn fx:id="registeredColumn" text="Дата регистрации" prefWidth="130"/>
+            </columns>
+        </TableView>
+        <Label fx:id="countLabel" styleClass="count-label"/>
+    </VBox>
+
+    <VBox spacing="8" minHeight="150" styleClass="split-section">
+        <HBox spacing="16" alignment="BASELINE_LEFT">
+            <Label fx:id="ordersTitle" styleClass="section-title"/>
+            <Label fx:id="ordersSummary" styleClass="hint-label"/>
+        </HBox>
+        <TableView fx:id="ordersTable" VBox.vgrow="ALWAYS">
+            <columnResizePolicy><TableView fx:constant="CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN"/></columnResizePolicy>
+            <columns>
+                <TableColumn fx:id="orderIdColumn" text="№" prefWidth="50" styleClass="align-right"/>
+                <TableColumn fx:id="orderDateColumn" text="Дата" prefWidth="130"/>
+                <TableColumn fx:id="orderPartColumn" text="Запчасть" prefWidth="260"/>
+                <TableColumn fx:id="orderCategoryColumn" text="Категория" prefWidth="110"/>
+                <TableColumn fx:id="orderQuantityColumn" text="Кол-во" prefWidth="70" styleClass="align-right"/>
+                <TableColumn fx:id="orderTotalColumn" text="Сумма, руб." prefWidth="130" styleClass="align-right"/>
+                <TableColumn fx:id="orderStatusColumn" text="Статус" prefWidth="120"/>
+            </columns>
+        </TableView>
+    </VBox>
+</SplitPane>
